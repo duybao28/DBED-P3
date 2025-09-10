@@ -7,3 +7,8 @@ Suppose that you are given source code for a DBMS that does not support indexing
 
 Answer:
 ... your answer here ...
+I'd first run the same SELECT...WEHRE queries without any index and save the result. Then I'd create the index and re-run the exact queries to check whether the results are identical.
+By doing this, I can check for cover empty table, single row, all same values, duplicates, or different columns.
+Then I'd test errors such as index on missing column, data that was created twice, or drop non-existent data.
+After that, I'd also re-run the old tests with no index to make sure nothing broke.
+Finally, on a large dataset, I'd time the queries before or after indexing to show a clear speed-up while keeping the same results.

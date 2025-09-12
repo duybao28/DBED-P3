@@ -54,6 +54,47 @@ class SimpleDatabase:
         self.b_trees = [None] * len(self.header)
         print("... done!")
 
+    def create_index(self, column_name):
+        if self.table_name is None:         #Check for existence of table
+            print("no table loaded")
+            return
+        if column_name not in self.columns: #Check for existence of column
+            print("no such column")
+            return
+        
+        column_id = self.columns[column_name]
+        if self.b_trees[column_id] is not None: #Check for existence of index
+            print("index already exists")
+            return
+        
+        b_tree = BTree()
+        for row_id, row in enumerate(self.rows):
+            key = row[column_id]
+            b_tree.insert_key(key, row_id)
+        self.b_trees[column_id] = b_tree    #Create index
+        print("index created")
+
+    def drop_index(self, column_name):
+        if self.table_name is None:         #Check for existence of table
+            print("no table loaded")
+            return
+        if column_name not in self.columns: #Check for existence of column
+            print("no such column")
+            return
+        
+        column_id = self.columns[column_name]
+        if self.b_trees[column_id] is None: #Check for existence of index
+            print("no index to drop")
+            return
+        
+        self.b_trees[column_id] = None      #Drop index
+        print("index dropped")
+
+    def get_indexed_columns(self):
+        if self.columns is None:
+            return []
+        return [name for name, index in self.columns.items() if self.b_trees[index] is not None]
+
     def select_rows(self, table_name, column_name, column_value):
         # modify this code such that row selection uses index if it exists
         # note that our DBMS only supports loading one table at a time

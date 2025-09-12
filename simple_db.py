@@ -6,16 +6,16 @@ from b_tree import BTree
 class SimpleDatabase:
     def __init__(self):
         # before an actual table is loaded, class members are set to None
-        
+
         # a header is a list of column names
         # e.g., ['name', 'id', 'grade']
         self.header = None
-        
+
         # map column name to column index in the header
         self.columns = None
-        
+
         # None if table is not loaded
-        # otherwise list b-tree indices corresponding to columns 
+        # otherwise list b-tree indices corresponding to columns
         self.b_trees = None
 
         # rows contains actual data; this is a list of lists
@@ -46,11 +46,11 @@ class SimpleDatabase:
             self.header = f.readline().rstrip().split(",")
             self.rows = [line.rstrip().split(",") for line in f]
         self.table_name = table_name
-        
+
         self.columns = {}
         for i, column_name in enumerate(self.header):
             self.columns[column_name] = i
-            
+
         self.b_trees = [None] * len(self.header)
         print("... done!")
 
@@ -61,12 +61,12 @@ class SimpleDatabase:
         if column_name not in self.columns: #Check for existence of column
             print("no such column")
             return
-        
+
         column_id = self.columns[column_name]
         if self.b_trees[column_id] is not None: #Check for existence of index
             print("index already exists")
             return
-        
+
         b_tree = BTree()
         for row_id, row in enumerate(self.rows):
             key = row[column_id]
@@ -81,12 +81,12 @@ class SimpleDatabase:
         if column_name not in self.columns: #Check for existence of column
             print("no such column")
             return
-        
+
         column_id = self.columns[column_name]
         if self.b_trees[column_id] is None: #Check for existence of index
             print("no index to drop")
             return
-        
+
         self.b_trees[column_id] = None      #Drop index
         print("index dropped")
 
@@ -105,12 +105,21 @@ class SimpleDatabase:
         if column_name not in self.columns:
             # no such column
             return self.header, []
-            
+
         col_id = self.columns[column_name]
-        
+
         selected_rows = []
-        for row in self.rows:
-            if row[col_id] == column_value:
-                selected_rows.append(row)
-        
+        b_tree = self.b_trees[col_id]
+        if b_tree is not None:
+            result = b_tree.search_key(column_value)
+            if result is not None:
+                node, key_index = result
+                row_ids = node.key_vals[key_index][1]
+                for row_id in row_ids:
+                    selected_rows.append(self.rows[row_id])
+        else:
+            for row in self.rows:
+                if row[col_id] == column_value:
+                    selected_rows.append(row)
+
         return self.header, selected_rows
